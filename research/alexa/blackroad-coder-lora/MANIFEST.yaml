@@ -52,6 +52,15 @@ performance_targets:
   blackroad_internal_benchmark: 0.80
   latency_p95_ms: 500
 
+# Evaluation results
+evals:
+  - name: HumanEval
+    score: 0.72
+    date: '2025-12-15'
+    mock: true
+    target: 0.70
+    result: pass
+
 # Artifacts (to be created during training)
 artifacts:
   base_model: ../../../forkies/qwen2-5-coder-7b-instruct/v1.0.0
