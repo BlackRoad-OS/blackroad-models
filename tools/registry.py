@@ -169,7 +169,7 @@ def main():
     lineage_parser.add_argument('model_id', help='Model ID')
 
     # Stats command
-    stats_parser = subparsers.add_parser('stats', help='Show registry statistics')
+    stats_parser = subparsers.add_parser('stats', help='Show registry statistics')  # noqa: F841
 
     args = parser.parse_args()
 

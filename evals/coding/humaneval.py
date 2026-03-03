@@ -6,7 +6,7 @@ HumanEval is OpenAI's benchmark for code generation, consisting of 164
 hand-written programming problems with unit tests.
 
 Requirements:
-    pip install human-eval openai
+    pip install human-eval transformers torch peft accelerate
 
 Usage:
     python humaneval.py /path/to/model
@@ -14,14 +14,14 @@ Usage:
 """
 import argparse
 import json
-import os
+import yaml
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List
+from typing import Callable, Dict, List, Optional
 
 # Check if human-eval is available
 try:
-    from human_eval.data import read_problems, write_jsonl, stream_jsonl
+    from human_eval.data import read_problems, write_jsonl
     from human_eval.evaluation import evaluate_functional_correctness
     HUMANEVAL_AVAILABLE = True
 except ImportError:
@@ -30,31 +30,136 @@ except ImportError:
     HUMANEVAL_AVAILABLE = False
 
 
-def load_model(model_path: str):
+def _resolve_base_model(model_path: Path) -> Optional[str]:
+    """
+    Resolve the base HuggingFace model ID from a model directory.
+
+    Checks adapter_config.json first, then falls back to MANIFEST.yaml lineage.
+    Returns a HuggingFace model ID string, or None if not found.
+    """
+    # 1. Check adapter_config.json (PEFT standard)
+    adapter_config_path = model_path / "adapter_config.json"
+    if adapter_config_path.exists():
+        with open(adapter_config_path) as f:
+            adapter_cfg = json.load(f)
+        base = adapter_cfg.get("base_model_name_or_path")
+        if base:
+            return base
+
+    # 2. Fall back to MANIFEST.yaml lineage
+    manifest_path = model_path / "MANIFEST.yaml"
+    if manifest_path.exists():
+        with open(manifest_path) as f:
+            manifest = yaml.safe_load(f)
+        derived_from = manifest.get("derived_from") or []
+        if derived_from:
+            forkie_id = derived_from[0].get("id", "")
+            # Load the forkie registry to get the HuggingFace source
+            registry_path = Path("registry/forkies.yaml")
+            if registry_path.exists():
+                with open(registry_path) as f:
+                    forkies = yaml.safe_load(f) or []
+                for forkie in forkies:
+                    if forkie.get("id") == forkie_id:
+                        return forkie.get("full_name") or forkie.get("source")
+
+    return None
+
+
+def load_model(model_path: str) -> Callable[[str], str]:
     """
     Load a model for inference.
 
-    In production, this would load from:
-    - Forkies (via transformers)
-    - Research models (LoRA weights + base)
-    - Internal/Production (served endpoints)
+    Supports:
+    - Forkies and full models (via transformers)
+    - LoRA fine-tunes (base model + PEFT adapter weights)
+    - Internal/Production models with adapter_config.json or MANIFEST.yaml
 
-    For now, returns mock inference function.
+    Args:
+        model_path: Path to model directory or HuggingFace model ID
+
+    Returns:
+        Callable that takes a prompt string and returns a completion string
     """
     print(f"📦 Loading model from {model_path}")
 
-    # TODO: Implement actual model loading
-    # For LoRA models:
-    #   1. Load base model
-    #   2. Apply LoRA weights
-    #   3. Return inference function
+    try:
+        import torch
+        from transformers import AutoModelForCausalLM, AutoTokenizer
+    except ImportError as exc:
+        raise RuntimeError(
+            "transformers and torch are required for model loading.\n"
+            "Install with: pip install transformers torch accelerate"
+        ) from exc
 
-    def mock_inference(prompt: str) -> str:
-        """Mock inference for testing."""
-        # This would be replaced with actual model inference
-        return "def solution():\n    pass"
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    print(f"  Device: {device}")
 
-    return mock_inference
+    path = Path(model_path)
+    adapter_config_path = path / "adapter_config.json"
+    is_lora = adapter_config_path.exists()
+
+    if is_lora:
+        try:
+            from peft import PeftModel
+        except ImportError as exc:
+            raise RuntimeError(
+                "peft is required for LoRA models.\n"
+                "Install with: pip install peft"
+            ) from exc
+
+        base_model_id = _resolve_base_model(path)
+        if not base_model_id:
+            raise ValueError(
+                f"Cannot determine base model for LoRA adapter at {model_path}. "
+                f"Ensure {model_path}/adapter_config.json contains 'base_model_name_or_path' "
+                f"or {model_path}/MANIFEST.yaml contains lineage with a registered forkie."
+            )
+
+        print(f"  Loading LoRA adapter (base: {base_model_id})")
+        tokenizer = AutoTokenizer.from_pretrained(base_model_id)
+        base = AutoModelForCausalLM.from_pretrained(
+            base_model_id,
+            torch_dtype=torch.float16 if device == "cuda" else torch.float32,
+            device_map="auto" if device == "cuda" else None,
+        )
+        model = PeftModel.from_pretrained(base, model_path)
+    else:
+        # Full model: local directory or HuggingFace model ID
+        hf_id = model_path
+        print(f"  Loading full model ({hf_id})")
+        tokenizer = AutoTokenizer.from_pretrained(hf_id)
+        model = AutoModelForCausalLM.from_pretrained(
+            hf_id,
+            torch_dtype=torch.float16 if device == "cuda" else torch.float32,
+            device_map="auto" if device == "cuda" else None,
+        )
+
+    if device == "cpu":
+        model = model.to(device)
+    model.eval()
+
+    if tokenizer.pad_token_id is None:
+        tokenizer.pad_token_id = tokenizer.eos_token_id
+
+    print("  ✅ Model loaded")
+
+    def inference(prompt: str) -> str:
+        """Run inference on a single HumanEval prompt."""
+        inputs = tokenizer(prompt, return_tensors="pt").to(device)
+        with torch.no_grad():
+            output_ids = model.generate(
+                **inputs,
+                max_new_tokens=512,
+                temperature=0.2,
+                do_sample=True,
+                pad_token_id=tokenizer.pad_token_id,
+            )
+        # Return only the newly generated tokens (not the prompt)
+        new_tokens = output_ids[0][inputs["input_ids"].shape[1]:]
+        return tokenizer.decode(new_tokens, skip_special_tokens=True)
+
+    return inference
 
 
 def generate_completions(problems: Dict, model_fn, num_samples: int = 1) -> List[Dict]:
