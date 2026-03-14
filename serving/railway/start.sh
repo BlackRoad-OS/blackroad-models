@@ -7,24 +7,11 @@ echo "🚀 Starting BlackRoad Model Server"
 echo "Model: ${MODEL_ID}"
 echo "Base: ${BASE_MODEL}"
 
-# Download LoRA weights from S3 if not already present
-if [ ! -d "${LORA_MODEL_PATH}" ] || [ -z "$(ls -A "${LORA_MODEL_PATH}" 2>/dev/null)" ]; then
-  echo "📦 Downloading LoRA weights from S3..."
-
-  if [ -z "${LORA_S3_URI}" ]; then
-    echo "❌ LORA_S3_URI is not set. Cannot download LoRA weights." >&2
-    exit 1
-  fi
-
-  mkdir -p "${LORA_MODEL_PATH}"
-
-  aws s3 sync "${LORA_S3_URI}" "${LORA_MODEL_PATH}" \
-    --no-progress \
-    --exact-timestamps
-
-  echo "✅ LoRA weights downloaded to ${LORA_MODEL_PATH}"
-else
-  echo "✅ LoRA weights already present at ${LORA_MODEL_PATH}"
+# Download LoRA weights if needed
+if [ ! -d "${LORA_MODEL_PATH}" ]; then
+  echo "📦 Downloading LoRA weights..."
+  # TODO: Download from S3 or model registry
+  # For now, assume weights are baked into image or volume
 fi
 
 # Start vLLM server with LoRA

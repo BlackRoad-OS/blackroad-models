@@ -40,7 +40,6 @@ VLLM_TENSOR_PARALLEL_SIZE = "1"
 # LoRA configuration
 VLLM_ENABLE_LORA = "true"
 LORA_MODEL_PATH = "/app/models/blackroad-coder-7b/v1/lora_weights"
-# LORA_S3_URI set via Railway secrets (e.g. s3://blackroad-models/internal/blackroad-coder-7b/v1/lora_weights/)
 
 # Serving configuration
 PORT = "8000"
@@ -98,4 +97,3 @@ size = "50Gi"
 # - API_KEY (model serving API key)
 # - SENTRY_DSN (error tracking)
 # - HUGGINGFACE_TOKEN (for model downloads)
-# - LORA_S3_URI (S3 URI for LoRA weights, e.g. s3://blackroad-models/internal/blackroad-coder-7b/v1/lora_weights/)
