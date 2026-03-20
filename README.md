@@ -3,7 +3,7 @@
 **Model Sovereignty System for BlackRoad OS**
 
 This repository manages BlackRoad's model intellectual property:
-- **Forkies** - Version-pinned upstream open-source models
+- **Forkies** - Version-pinned upstream open-access models
 - **Research Models** - Active experiments and fine-tuning
 - **Internal Models** - Production-ready, internal use only
 - **Production Models** - Customer-facing with SLAs
