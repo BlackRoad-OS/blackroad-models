@@ -1,144 +1,48 @@
-# BlackRoad Models
+<!-- BlackRoad SEO Enhanced -->
 
-**Model Sovereignty System for BlackRoad OS**
+# ulackroad models
 
-This repository manages BlackRoad's model intellectual property:
-- **Forkies** - Version-pinned upstream open-access models
-- **Research Models** - Active experiments and fine-tuning
-- **Internal Models** - Production-ready, internal use only
-- **Production Models** - Customer-facing with SLAs
+> Part of **[BlackRoad OS](https://blackroad.io)** — Sovereign Computing for Everyone
 
----
+[![BlackRoad OS](https://img.shields.io/badge/BlackRoad-OS-ff1d6c?style=for-the-badge)](https://blackroad.io)
+[![BlackRoad OS](https://img.shields.io/badge/Org-BlackRoad-OS-2979ff?style=for-the-badge)](https://github.com/BlackRoad-OS)
+[![License](https://img.shields.io/badge/License-Proprietary-f5a623?style=for-the-badge)](LICENSE)
 
-## Quick Start
+**ulackroad models** is part of the **BlackRoad OS** ecosystem — a sovereign, distributed operating system built on edge computing, local AI, and mesh networking by **BlackRoad OS, Inc.**
 
-### Fork a Model
-```bash
-python3 tools/fork.py meta-llama/Llama-3.1-8B-Instruct --version v1.0.0
-```
+## About BlackRoad OS
 
-### List Models
-```bash
-python3 tools/registry.py list --stage internal
-```
+BlackRoad OS is a sovereign computing platform that runs AI locally on your own hardware. No cloud dependencies. No API keys. No surveillance. Built by [BlackRoad OS, Inc.](https://github.com/BlackRoad-OS-Inc), a Delaware C-Corp founded in 2025.
 
-### Check Access
-```bash
-python3 tools/registry.py check-access internal/my-model service-id
-```
+### Key Features
+- **Local AI** — Run LLMs on Raspberry Pi, Hailo-8, and commodity hardware
+- **Mesh Networking** — WireGuard VPN, NATS pub/sub, peer-to-peer communication
+- **Edge Computing** — 52 TOPS of AI acceleration across a Pi fleet
+- **Self-Hosted Everything** — Git, DNS, storage, CI/CD, chat — all sovereign
+- **Zero Cloud Dependencies** — Your data stays on your hardware
 
----
+### The BlackRoad Ecosystem
+| Organization | Focus |
+|---|---|
+| [BlackRoad OS](https://github.com/BlackRoad-OS) | Core platform and applications |
+| [BlackRoad OS, Inc.](https://github.com/BlackRoad-OS-Inc) | Corporate and enterprise |
+| [BlackRoad AI](https://github.com/BlackRoad-AI) | Artificial intelligence and ML |
+| [BlackRoad Hardware](https://github.com/BlackRoad-Hardware) | Edge hardware and IoT |
+| [BlackRoad Security](https://github.com/BlackRoad-Security) | Cybersecurity and auditing |
+| [BlackRoad Quantum](https://github.com/BlackRoad-Quantum) | Quantum computing research |
+| [BlackRoad Agents](https://github.com/BlackRoad-Agents) | Autonomous AI agents |
+| [BlackRoad Network](https://github.com/BlackRoad-Network) | Mesh and distributed networking |
+| [BlackRoad Education](https://github.com/BlackRoad-Education) | Learning and tutoring platforms |
+| [BlackRoad Labs](https://github.com/BlackRoad-Labs) | Research and experiments |
+| [BlackRoad Cloud](https://github.com/BlackRoad-Cloud) | Self-hosted cloud infrastructure |
+| [BlackRoad Forge](https://github.com/BlackRoad-Forge) | Developer tools and utilities |
 
-## Repository Structure
-
-```
-blackroad-models/
-├── forkies/          # Upstream snapshots (read-only)
-├── research/         # Experiments (90-day lifecycle)
-├── internal/         # Validated internal models
-├── production/       # Customer-facing models
-├── deprecated/       # Archived models (2-year retention)
-├── serving/          # Serving configs (vLLM, Ollama, Railway)
-├── evals/            # Evaluation harnesses
-├── tools/            # CLI tools
-├── registry/         # Model metadata (YAML)
-└── logs/             # Audit logs
-```
+### Links
+- **Website**: [blackroad.io](https://blackroad.io)
+- **Documentation**: [docs.blackroad.io](https://docs.blackroad.io)
+- **Chat**: [chat.blackroad.io](https://chat.blackroad.io)
+- **Search**: [search.blackroad.io](https://search.blackroad.io)
 
 ---
 
-## Core Principles
 
-1. **Models are IP, not infrastructure**
-2. **Fork with purpose** - Every model has clear ownership
-3. **Lifecycle discipline** - Research → Internal → Production
-4. **Access control** - Explicit allow lists, audit logging
-5. **Lineage tracking** - Complete derivation graphs
-
----
-
-## CLI Tools
-
-| Tool | Purpose |
-|------|---------|
-| `fork.py` | Create Forkie from upstream |
-| `create.py` | Start research experiment |
-| `eval.py` | Run evaluation suite |
-| `promote.py` | Promote to next stage |
-| `serve.py` | Start model server |
-| `registry.py` | Query model registry |
-
----
-
-## Lifecycle
-
-```
-┌──────────┐
-│  Forkie  │ (Upstream snapshot, read-only)
-└────┬─────┘
-     │ fork + experiment
-     ▼
-┌──────────┐
-│ Research │ (90 days, single owner)
-└────┬─────┘
-     │ eval + validate
-     ▼
-┌──────────┐
-│ Internal │ (Production-ready, internal use)
-└────┬─────┘
-     │ customer-facing decision
-     ▼
-┌────────────┐
-│ Production │ (Customer-facing, SLA)
-└────────────┘
-```
-
----
-
-## Documentation
-
-- **[MODELS.md](MODELS.md)** - Complete architecture
-- **[WORKFLOW.md](WORKFLOW.md)** - End-to-end guide
-- **[30-DAY PLAN](MODEL_SOVEREIGNTY_30DAY_PLAN.md)** - Implementation plan
-
----
-
-## Current Inventory
-
-**Forkies:** 0
-**Research:** 0
-**Internal:** 0
-**Production:** 0
-
-(Day 1 - just getting started! 🚀)
-
----
-
-## Contact
-
-**Owner:** BlackRoad Platform Architecture
-**Email:** blackroad.systems@gmail.com
-**GitHub:** https://github.com/BlackRoad-OS/blackroad-models
-
----
-
-**Status:** 🚧 Day 1 - Foundation Phase
-
----
-
-## 📜 License & Copyright
-
-**Copyright © 2026 BlackRoad OS, Inc. All Rights Reserved.**
-
-**CEO:** Alexa Amundson | **PROPRIETARY AND CONFIDENTIAL**
-
-This software is NOT for commercial resale. Testing purposes only.
-
-### 🏢 Enterprise Scale:
-- 30,000 AI Agents
-- 30,000 Human Employees
-- CEO: Alexa Amundson
-
-**Contact:** blackroad.systems@gmail.com
-
-See [LICENSE](LICENSE) for complete terms.
